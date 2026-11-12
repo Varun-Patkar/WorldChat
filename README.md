@@ -1,8 +1,9 @@
 # WorldChat
 
-A web-based 3D world creation engine and editor — like Unity, but in the browser. Create worlds by arranging objects, then play them as interactive games or export them as animated videos. An intelligent agent works alongside you to help create, edit, and manage everything.
+A web-based 3D world creation engine and editor — like Unity, but in the browser. Create worlds by arranging objects, then play them as interactive games or record animations as videos. All runs locally in your browser.
 
-> **v1 Status:** Planning phase. This project is being scaffolded now with manual editor focus first, agent integration to follow.
+> **v1 Status:** Design complete ✅ — Ready to start building tomorrow.  
+> An intelligent agent will work alongside you (Ollama-compatible API default, OpenAI Chat Completions swappable). Agent integration is post-v1; v1 focuses on the manual editor.
 
 ---
 
@@ -17,35 +18,48 @@ cd WorldChat
 ./start.sh
 ```
 
-See the [full specification](docs/Spec1.md) for planned features and architecture.
+See [docs/Spec1.md](docs/Spec1.md) for the full specification and roadmap.
 
 ---
 
 ## Features (v1 Planned)
 
 ### Project Management
-- Create projects in any local folder
+- **Single monolithic app** — Vite + React + TypeScript, no monorepo
+- Create projects in any local folder (like VSCode workspaces)
 - Auto-save last opened project
 - Simple `start.sh` / `start.bat` to launch dev server
 
-### 3D Editor
-- **Left panel:** Hierarchy tree of all scene objects
-- **Center panel:** Interactive 3D viewport with orbit/pan/zoom
-- **Right panel:** Agent panel (reserved for future)
-- **Bottom panel:** Contextual properties editor
+### 3D Editor (Three Panels + Properties)
+| Panel | Location | Purpose |
+|-------|----------|---------|
+| Hierarchy | Left | Tree of all scene objects, parent-child relationships |
+| Scene View | Center | 3D viewport with orbit/pan/zoom |
+| Agent Panel | Right (collapsible) | Reserved for future agent integration |
+| Properties | Bottom | Contextual — editable properties when object selected |
 
 ### Object Creation
-- Right-click to add primitives: Box, Sphere, Cylinder, Cone, Plane, Torus, Capsule
-- Import 3D models from Sketchfab or any glTF/GLB URL
+- **Right-click primitives:** Box, Sphere, Cylinder, Cone, Plane, Torus, Capsule
+- **Drag-and-drop import:** `.glb`, `.gltf` files with pre-processing pipeline (normalizes materials, scales, metadata)
 
-### Transform Tools (Unity-like)
-- **Move** (`W`) — translate on X/Y/Z axes
-- **Rotate** (`E`) — rotate around axes  
-- **Scale** (`R`) — scale uniformly or per-axis
+### Transform Tools (Unity-like via drei)
+| Tool | Hotkey | What it does |
+|------|--------|-------------|
+| **Move** | `W` | Translate on X/Y/Z axes |
+| **Rotate** | `E` | Rotate around axes |
+| **Scale** | `R` | Scale uniformly or per-axis |
 
-### Export Modes
-- **Game/Playable:** Define player controls, generate playable build
-- **Video:** Keyframe camera animations, export as rendered video
+### In-App Modes (No File Export)
+
+#### Game / Play Mode
+- Press **"Play"** to walk around your created world in FPS-style controls
+- Configurable WASD + mouse look before play
+- Press **Esc** to return to edit mode
+
+#### Video / Animation Mode
+- Define camera keyframes (position, target, duration)
+- Play back animations in real time
+- Frame capture for video export — all browser-based, no server
 
 ---
 
@@ -53,65 +67,72 @@ See the [full specification](docs/Spec1.md) for planned features and architectur
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React + TypeScript |
+| Frontend | React + TypeScript (Vite) |
 | 3D Engine | React Three Fiber + drei |
 | State | Zustand |
 | Styling | Tailwind CSS |
 | Dev Server | Vite |
-| Project Format | JSON |
+| Project Format | JSON + code files |
+
+### Agent (Post-v1)
+- **Default:** Ollama-compatible `http://127.0.0.1:47831`
+- **Swappable:** OpenAI Chat Completions API
+- Tools → Declarative R3F calls with raw Three.js code fallback
 
 ---
 
-## Project Structure (Planned)
+## Project Structure (v1)
 
 ```
 WorldChat/
-├── docs/                 # Specifications, design docs
-│   └── Spec1.md          # v1 specification
-├── packages/             # Monorepo-style workspaces
-│   ├── editor/           # Main 3D editor application
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   ├── hooks/
-│   │   │   ├── stores/       # Zustand stores
-│   │   │   └── utils/        # Scene serialization, imports
-│   │   └── ...
-│   └── core/             # Shared types, constants
-├── .gitignore
+├── docs/
+│   └── Spec1.md              # Full specification + roadmap
+├── src/
+│   ├── components/
+│   │   ├── editor/           # Hierarchy, SceneViewport, Properties panels
+│   │   ├── scene/            # Primitives, TransformGizmo, CameraControls
+│   │   └── ui/               # Shared UI components
+│   ├── hooks/                # useProject, useSelection, useTransform
+│   ├── stores/               # Zustand stores (scene, selection, project)
+│   ├── utils/                # Serializer, model importer, file drop handler
+│   ├── types/                # TypeScript type definitions
+│   └── App.tsx               # Main layout
 ├── LICENSE
 ├── README.md
-└── start.sh              # Starter script to run editor dev server
+├── start.sh                  # Dev server starter script
+├── package.json
+├── vite.config.ts
+└── tsconfig.json
 ```
 
 ---
 
 ## Roadmap
 
-### Phase 1 — Foundation (Now)
+### Phase 1 — Foundation (Now) 🚧
 - [x] Project scaffold and git setup
-- [x] Specification document
-- [ ] Editor with basic scene rendering
+- [x] Specification document (this design)
+- [ ] Editor with basic R3F scene rendering
 - [ ] Hierarchy panel + object selection
-- [ ] Primitive shape creation (right-click menu)
-- [ ] Transform gizmos (move, rotate, scale)
+- [ ] Primitive shape creation via right-click
+- [ ] Transform gizmos (W/E/R) using drei
 
 ### Phase 2 — Assets & Persistence
-- [ ] Properties panel with transform editing
-- [ ] Project save/load (JSON scene serialization)
+- [ ] Scene serialization (JSON + code files)
 - [ ] Last-opened project tracking
-- [ ] Sketchfab / URL model import
-- [ ] Asset management system
+- [ ] Drag-and-drop glb/gltf import pipeline
+- [ ] Asset management in `assets/` folder
 
-### Phase 3 — Export
-- [ ] Game/playable mode export
-- [ ] Video mode with camera keyframes
-- [ ] Build pipeline for exports
+### Phase 3 — Play & Video Modes
+- [ ] Game mode (WASD FPS controls, Esc to return)
+- [ ] Camera keyframe editor
+- [ ] Animation playback and frame capture
 
-### Phase 4 — Agent Integration (Post-v1)
-- [ ] Natural language object creation
-- [ ] AI-assisted scene editing
-- [ ] Agent control panel UI
-- [ ] Workflow automation
+### Phase 4 — Agent Integration (Post-v1) 🤖
+- [ ] Ollama/OpenAI Chat Completions API integration
+- [ ] Tool system for scene manipulation
+- [ ] Raw Three.js code hot-loading fallback
+- [ ] Agent UI panel
 
 ---
 
